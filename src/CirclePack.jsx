@@ -63,7 +63,7 @@ function CountryCircle({ country, data, year, size, hoveredKey }) {
             <circle cx={FLAG_SIZE / 2} cy={labelY} r={FLAG_SIZE / 2} />
           </clipPath>
           <image
-            href={`/flags/${country}.png`}
+            href={`${import.meta.env.BASE_URL}flags/${country}.png`}
             x={0}
             y={labelY - FLAG_SIZE / 2}
             width={FLAG_SIZE}
