@@ -142,7 +142,7 @@ export default function BarChart({
             <g key={country}>
               {/* Flag */}
               <image
-                href={`${import.meta.env.BASE_URL}Flags/${country}.png`}
+                href={`${import.meta.env.BASE_URL}flags/${country}.png`}
                 x={flagX}
                 y={midY - FLAG_H / 2}
                 width={FLAG_W}
