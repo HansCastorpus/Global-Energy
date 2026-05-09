@@ -179,7 +179,7 @@ svg text {
   margin: 0px 0px 36px 0px;
 
   /* blur backdrop instead of solid bg */
-  background: var(--surface) (13, 17, 23, 0.1);
+  background: rgba(223, 219, 216, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 
