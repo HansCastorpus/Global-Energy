@@ -27,9 +27,11 @@ export default function AlluvialChartPct({
 }) {
   const windowWidth = useWindowWidth();
   
-  // Tighter margins on narrow screens
-  const adjustedMargin = width < 500
-    ? { top: 32, right: 16, bottom: 16, left: 32 }
+  const compact = width < 500;
+
+  // Tighter margins on narrow screens; right needs ~30px for a "100%" label
+  const adjustedMargin = compact
+    ? { top: 32, right: 30, bottom: 16, left: 32 }
     : margin;
   
   const innerW = width - adjustedMargin.left - adjustedMargin.right;
@@ -164,6 +166,26 @@ export default function AlluvialChartPct({
         {(() => {
           const lastCol = columns[columns.length - 1];
           if (!lastCol) return null;
+
+          if (compact) {
+            return rightLabels.map(({ key, y, share }) => {
+              const node = lastCol.nodes.find((n) => n.key === key);
+              if (!node || node.y1 - node.y0 < 8) return null;
+              return (
+                <text key={key}
+                  x={lastCol.x + lastCol.nodeWidth + 6}
+                  y={y}
+                  dy="0.32em"
+                  textAnchor="start"
+                  fill="var(--text-muted)"
+                  fontSize={9}
+                  fontFamily="var(--font-mono)">
+                  {pct(share)}
+                </text>
+              );
+            });
+          }
+
           const labelX = lastCol.x + lastCol.nodeWidth + 8;
           return rightLabels.map(({ key, naturalY, y, share }) => (
             <g key={key}>
