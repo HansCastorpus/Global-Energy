@@ -13,17 +13,24 @@ export default function LineChart({
   data = [],
   width = 600,
   height = 400,
-  margin = { top: 40, right: 120, bottom: 48, left: 72 },
+  margin: marginProp = { top: 40, right: 120, bottom: 48, left: 72 },
   field = "primary_energy",
   label = "Total Energy (TWh)",
   hoveredKey = null,
 }) {
-  const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
   const windowWidth = useWindowWidth();
 
+  const compact = width < 500;
+
+  // Tighter margins on narrow screens; right must fit a 12px flag + text
+  const margin = compact
+    ? { top: 24, right: 22, bottom: 36, left: 44 }
+    : { ...marginProp, right: marginProp.right + 16 };
+
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+
   const { lines, xScale, yScale, yTicks, xTicks } = useMemo(() => {
-    // Exclude World aggregate
     const filtered = data.filter((d) => d.country !== "World");
 
     const grouped = d3.group(filtered, (d) => d.country);
@@ -72,15 +79,15 @@ export default function LineChart({
       lines,
       xScale,
       yScale,
-      yTicks: yScale.ticks(6),
-      xTicks: xScale.ticks(8),
+      yTicks: yScale.ticks(compact ? 3 : 6),
+      xTicks: xScale.ticks(compact ? 4 : 8),
     };
-  }, [data, innerW, innerH, field]);
+  }, [data, innerW, innerH, field, compact]);
 
   // Collision-nudge end labels
   const nudgedLabels = useMemo(() => {
     if (!lines.length) return [];
-    const MIN_SPACING = 12;
+    const MIN_SPACING = compact ? 16 : 18;
     const items = lines
       .map((l) => ({ ...l, y: l.lastY }))
       .sort((a, b) => a.y - b.y);
@@ -95,9 +102,12 @@ export default function LineChart({
       }
     }
     return items;
-  }, [lines]);
+  }, [lines, compact]);
 
-  const fmt = d3.format(",.0f");
+  // Compact number format on narrow screens: 50,000 → 50k
+  const fmt    = d3.format(",.0f");
+  const fmtK   = (v) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(Math.round(v));
+  const fmtVal = width < 500 ? fmtK : fmt;
 
   return (
     <svg width={width} height={height} style={{ overflow: "visible" }}>
@@ -129,36 +139,50 @@ export default function LineChart({
           />
         ))}
 
-        {/* Annotation lines + labels — hidden on small screens */}
-        {width > 640 && windowWidth > 1300 && Object.entries(ANNOTATIONS).map(([yearStr, lines_]) => {
-          const x = xScale(+yearStr);
-          return (
-            <g key={yearStr}>
-              <line
-                x1={x}
-                x2={x}
-                y1={0}
-                y2={innerH}
-                stroke="var(--text-dim)"
-                strokeWidth={0.8}
-                strokeDasharray="3 3"
-              />
-              {lines_.map((line, li) => (
-                <text
-                  key={li}
-                  x={x + 3}
-                  y={-6 - (lines_.length - 1 - li) * 12}
-                  fill={li === 0 ? "var(--text)" : "var(--text-muted)"}
-                  fontSize={li === 0 ? 11 : 7.5}
-                  fontFamily="var(--font-mono)"
-                  fontWeight={li === 0 ? 600 : 400}
-                >
-                  {line}
-                </text>
-              ))}
-            </g>
-          );
-        })}
+        {/* Annotations — hidden below 1300px, oil crises merge when lines are close */}
+        {windowWidth > 1300 && (() => {
+          const entries = Object.entries(ANNOTATIONS);
+          const x73 = xScale(1973);
+          const x79 = xScale(1979);
+          const mergeOilCrises = x79 - x73 < 40;
+
+          return entries.map(([yearStr, lines_]) => {
+            const x    = xScale(+yearStr);
+            const year = +yearStr;
+
+            const skipLabel  = mergeOilCrises && year === 1979;
+            const labelLines = mergeOilCrises && year === 1973
+              ? ["1973 · 1979", "Oil Crises"]
+              : lines_;
+
+            return (
+              <g key={yearStr}>
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={0}
+                  y2={innerH}
+                  stroke="var(--text-dim)"
+                  strokeWidth={0.8}
+                  strokeDasharray="3 3"
+                />
+                {!skipLabel && labelLines.map((line, li) => (
+                  <text
+                    key={li}
+                    x={x + 3}
+                    y={-6 - (labelLines.length - 1 - li) * 12}
+                    fill={li === 0 ? "var(--text)" : "var(--text-muted)"}
+                    fontSize={li === 0 ? 11 : 7.5}
+                    fontFamily="var(--font-mono)"
+                    fontWeight={li === 0 ? 600 : 400}
+                  >
+                    {line}
+                  </text>
+                ))}
+              </g>
+            );
+          });
+        })()}
 
         {/* Lines */}
         {lines.map((l) => (
@@ -195,16 +219,34 @@ export default function LineChart({
               strokeWidth={0.6}
               opacity={0.5}
             />
-            <text
+            <image
+              href={`${import.meta.env.BASE_URL}flags/${l.country}.png`}
               x={l.lastX + 10}
-              y={l.y}
-              dy="0.32em"
-              fill="var(--text-muted)"
-              fontSize={11}
-              fontFamily="var(--font-sans)"
-            >
-              {l.country}
-            </text>
+              y={l.y - 6}
+              width={12}
+              height={12}
+              preserveAspectRatio="xMidYMid meet"
+            />
+            <circle
+              cx={l.lastX + 16}
+              cy={l.y}
+              r={6}
+              fill="none"
+              stroke="var(--border)"
+              strokeWidth={0.8}
+            />
+            {!compact && (
+              <text
+                x={l.lastX + 26}
+                y={l.y}
+                dy="0.32em"
+                fill="var(--text-muted)"
+                fontSize={11}
+                fontFamily="var(--font-sans)"
+              >
+                {l.country}
+              </text>
+            )}
           </g>
         ))}
 
@@ -225,7 +267,7 @@ export default function LineChart({
             dy="0.71em"
             textAnchor="middle"
             fill="var(--text-muted)"
-            fontSize={10}
+            fontSize={width < 500 ? 8 : 10}
             fontFamily="var(--font-mono)"
           >
             {t}
@@ -249,10 +291,10 @@ export default function LineChart({
             dy="0.32em"
             textAnchor="end"
             fill="var(--text-muted)"
-            fontSize={10}
+            fontSize={width < 500 ? 8 : 10}
             fontFamily="var(--font-mono)"
           >
-            {fmt(t)}
+            {fmtVal(t)}
           </text>
         ))}
 

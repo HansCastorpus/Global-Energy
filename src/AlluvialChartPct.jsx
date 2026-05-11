@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import * as d3 from "d3";
 import { PALETTE, ENERGY_KEYS } from "./constants";
+import { useWindowWidth } from "./useWindowWidth";
 
 const YEARS = [1965, 1973, 1979, 1991, 2000, 2010, 2020, 2024];
 const LABELS = {
@@ -24,11 +25,22 @@ export default function AlluvialChartPct({
   country = "World",
   hoveredKey = null,
 }) {
-  const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
+  const windowWidth = useWindowWidth();
+  
+  // Tighter margins on narrow screens
+  const adjustedMargin = width < 500
+    ? { top: 32, right: 16, bottom: 16, left: 32 }
+    : margin;
+  
+  const innerW = width - adjustedMargin.left - adjustedMargin.right;
+  const innerH = height - adjustedMargin.top - adjustedMargin.bottom;
 
   const op = (key) => !hoveredKey || hoveredKey.has(key) ? 1 : 0.08;
   const ribbonOp = (key) => !hoveredKey || hoveredKey.has(key) ? 0.3 : 0.04;
+
+  // Compact number format on narrow screens: 50,000 → 50k
+  const fmtK   = (v) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(Math.round(v));
+  const fmtVal = width < 500 ? fmtK : (v) => v.toFixed(0);
 
   const { columns, ribbons } = useMemo(() => {
     const snapshots = YEARS.map((year) =>
@@ -102,7 +114,7 @@ export default function AlluvialChartPct({
 
   return (
     <svg width={width} height={height} style={{ overflow: "visible" }}>
-      <g transform={`translate(${margin.left},${margin.top})`}>
+      <g transform={`translate(${adjustedMargin.left},${adjustedMargin.top})`}>
 
         {ribbons.map((r, i) => (
           <path key={i} d={r.path} fill={r.fill}

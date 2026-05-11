@@ -14,8 +14,13 @@ export default function BarChart({
   keys = ENERGY_KEYS,
   hoveredKey = null,
 }) {
-  const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
+  const compact = width < 500;
+  const effectiveMargin = compact
+    ? { ...margin, left: FLAG_W + FLAG_GAP * 2 + 4 }
+    : margin;
+
+  const innerW = width - effectiveMargin.left - effectiveMargin.right;
+  const innerH = height - effectiveMargin.top - effectiveMargin.bottom;
 
   const op = (key) => (!hoveredKey || hoveredKey.has(key) ? 1 : 0.08);
 
@@ -61,14 +66,14 @@ export default function BarChart({
       })),
     }));
 
-    return { rows, xScale, yScale, xTicks: xScale.ticks(5) };
-  }, [data, innerW, innerH, keys]);
+    return { rows, xScale, yScale, xTicks: xScale.ticks(compact ? 3 : 5) };
+  }, [data, innerW, innerH, keys, compact]);
 
   const pct = d3.format(".0%");
 
   return (
     <svg width={width} height={height} style={{ overflow: "visible" }}>
-      <g transform={`translate(${margin.left},${margin.top})`}>
+      <g transform={`translate(${effectiveMargin.left},${effectiveMargin.top})`}>
         {xTicks.map((t) => (
           <line
             key={t}
@@ -158,17 +163,19 @@ export default function BarChart({
                 strokeWidth={0.8}
               />
               {/* Country name */}
-              <text
-                x={textX}
-                y={midY}
-                dy="0.32em"
-                textAnchor="end"
-                fill="var(--text-muted)"
-                fontSize={10}
-                fontFamily="var(--font-sans)"
-              >
-                {country}
-              </text>
+              {!compact && (
+                <text
+                  x={textX}
+                  y={midY}
+                  dy="0.32em"
+                  textAnchor="end"
+                  fill="var(--text-muted)"
+                  fontSize={10}
+                  fontFamily="var(--font-sans)"
+                >
+                  {country}
+                </text>
+              )}
             </g>
           );
         })}
