@@ -28,12 +28,18 @@ function CountryPicker({ selectedCountries, onSelect }) {
   }, []);
 
   return (
-    <div ref={containerRef} style={{
-      display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
-      padding: 0,
-      background: "var(--surface)",
-      border: "1px solid var(--border)",
-    }}>
+    <div
+      ref={containerRef}
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 0,
+        justifyContent: "center",
+        padding: 0,
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+      }}
+    >
       {COUNTRIES_WITH_FLAGS.map((country) => {
         const isSelected = selectedCountries.includes(country);
         return (
@@ -43,22 +49,34 @@ function CountryPicker({ selectedCountries, onSelect }) {
             className="country-btn"
             data-selected={isSelected}
             style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 3,
               padding: "5px 7px",
               background: isSelected ? "var(--btn-pressed)" : "transparent",
               borderTop: "none",
               borderBottom: "none",
-              borderLeft: isSelected ? "1px solid var(--border)" : "1px solid transparent",
-              borderRight: isSelected ? "1px solid var(--border)" : "1px solid transparent",
-              cursor: isSelected ? "default" : "pointer",
+              borderLeft: isSelected
+                ? "1px solid var(--border)"
+                : "1px solid transparent",
+              borderRight: isSelected
+                ? "1px solid var(--border)"
+                : "1px solid transparent",
+              cursor: "pointer",
               fontFamily: "var(--font-mono)",
               color: isSelected ? "var(--text)" : "var(--text-muted)",
             }}
           >
             <img
               src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-              width={14} height={14}
-              style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
+              width={14}
+              height={14}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "0.5px solid var(--border)",
+              }}
               alt={country}
             />
             {showNames && <span style={{ fontSize: 9 }}>{country}</span>}
@@ -70,22 +88,55 @@ function CountryPicker({ selectedCountries, onSelect }) {
 }
 
 const COUNTRIES_WITH_FLAGS = [
-  "Argentina", "Australia", "Brazil", "Canada", "China",
-  "Egypt", "France", "Germany", "India", "Indonesia",
-  "Iran", "Italy", "Japan", "Malaysia", "Mexico",
-  "Poland", "Saudi Arabia", "South Africa", "South Korea", "Spain",
-  "Thailand", "Turkey", "United Arab Emirates", "United Kingdom", "United States", "Vietnam",
+  "Argentina",
+  "Australia",
+  "Brazil",
+  "Canada",
+  "China",
+  "Egypt",
+  "France",
+  "Germany",
+  "India",
+  "Indonesia",
+  "Iran",
+  "Italy",
+  "Japan",
+  "Malaysia",
+  "Mexico",
+  "Poland",
+  "Saudi Arabia",
+  "South Africa",
+  "South Korea",
+  "Spain",
+  "Thailand",
+  "Turkey",
+  "United Arab Emirates",
+  "United Kingdom",
+  "United States",
+  "Vietnam",
 ];
 
 export default function App() {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [barYear, setBarYear] = useState(2024);
   const [barSortKey, setBarSortKey] = useState("coal");
-  const [selectedCountries, setSelectedCountries] = useState(["United States", "France", "China"]);
+  const [selectedCountries, setSelectedCountries] = useState([
+    "United States",
+    "France",
+    "China",
+  ]);
 
   const selectCountry = (country) => {
     setSelectedCountries((prev) => {
-      if (prev.includes(country)) return prev;
+      if (prev.includes(country)) {
+        return prev.map((c) => (c === country ? null : c));
+      }
+      const emptyIdx = prev.indexOf(null);
+      if (emptyIdx !== -1) {
+        const next = [...prev];
+        next[emptyIdx] = country;
+        return next;
+      }
       return [...prev.slice(1), country];
     });
   };
@@ -96,10 +147,14 @@ export default function App() {
 
   useEffect(() => {
     const check = () => {
-      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
-      const pickerBottom = pickerRef.current?.getBoundingClientRect().bottom ?? 0;
-      const pickerHeight = pickerRef.current?.getBoundingClientRect().height ?? 0;
-      const chartsEndTop = chartsEndRef.current?.getBoundingClientRect().top ?? Infinity;
+      const headerBottom =
+        headerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const pickerBottom =
+        pickerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const pickerHeight =
+        pickerRef.current?.getBoundingClientRect().height ?? 0;
+      const chartsEndTop =
+        chartsEndRef.current?.getBoundingClientRect().top ?? Infinity;
 
       if (pickerBottom >= headerBottom) {
         setPickerTop(null);
@@ -223,16 +278,37 @@ export default function App() {
             </div>
             <div className="info-band-text">
               <p>
-                Energy is an essential element of our modern world. Its use has
-                continuously increased for the last few decades with no sign of
-                stopping. Who uses what? How much? This data visualization looks
-                at this use through a series of different graphs. The legend
-                serves as a filter for specific energy viewing.
+                Energy is the essential element of our modern world. It allows
+                us to achieve the great things we set our mind to. It also leads
+                us to destroy our own environment. New cleaner energy is
+                appearing and will hopefully replace in the long term energies
+                that pollute and destroy the environment. Though we do see that
+                while the share of renewable energies have increased, so have
+                fossil fuels. Their share decreases, but the quantity increases.
+                This overall energy use has continuously increased for the last
+                few decades with no sign of stopping. Who uses what? How much?
+                This data visualization looks at this use through a series of
+                different graphs. The legend serves as a filter for specific
+                energy viewing. Energy is the essential element of our modern
+                world. It allows us to achieve the great things we set our mind
+                to. It also leads us to destroy our own environment. New cleaner
+                energy is appearing and will hopefully replace in the long term
+                energies that pollute and destroy the environment. Though we do
+                see that while the share of renewable energies have increased,
+                so have fossil fuels. Their share decreases, but the quantity
+                increases. This overall energy use has continuously increased
+                for the last few decades with no sign of stopping. Who uses
+                what? How much? This data visualization looks at this use
+                through a series of different graphs. The legend serves as a
+                filter for specific energy viewing.
               </p>
             </div>
           </div>
         </div>
-
+        {/* ── Info band ── */}
+        <div className="intro">
+          <div className="introGap"></div>
+        </div>
         {/* ── Info band ── */}
         <div className="info-band">
           <div className="info-band-title">
@@ -241,11 +317,12 @@ export default function App() {
           </div>
           <div className="info-band-text">
             <p>
-              The horizontal stacked barplot on the left shows the
-              proportional use oer six decades of the different energy sources showcased in this
-              dataset. The stacked area chart on the right shows the world’s
-              total energy output by source over six decades. Important events
-              are shown to give some more insight.
+              The horizontal stacked barplot on the left shows the proportional
+              use over six decades of the different energy sources showcased in
+              this dataset The slider enables a precise vision of each year
+              present in the dataset. The stacked area chart on the right shows
+              the world’s total energy output by source over six decades.
+              Important events are shown to give some more insight.
             </p>
           </div>
         </div>
@@ -253,50 +330,89 @@ export default function App() {
         {/* ── Row 1: 2 columns ── */}
         <div className="charts-grid-2">
           <section className="chart-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 0,
+              }}
+            >
               <h2 className="chart-title">Energy Use by Country</h2>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--text-muted)",
+                  }}
+                >
                   Top Energy User
                 </span>
                 <select
                   value={barSortKey}
                   onChange={(e) => setBarSortKey(e.target.value)}
                   style={{
-                    fontFamily: "var(--font-mono)", fontSize: 11,
-                    color: "var(--text-muted)", background: "var(--surface)",
-                    border: "1px solid var(--border)", padding: "2px 6px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--text-muted)",
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                    padding: "2px 6px",
                     cursor: "pointer",
+                    borderRadius: 0,
+                    outline: "none",
                   }}
                 >
                   {ENERGY_KEYS.map((k) => (
-                    <option key={k} value={k}>{k.replace(/_/g, " ")}</option>
+                    <option key={k} value={k}>
+                      {k.replace(/_/g, " ")}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 12,
-              padding: "10px 0",
-              fontFamily: "var(--font-mono)", fontSize: 12,
-              color: "var(--text-muted)",
-              width: "100%",
-            }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "10px 0",
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                color: "var(--text-muted)",
+                width: "100%",
+              }}
+            >
               <span>1965</span>
               <input
                 type="range"
-                min={1965} max={2024} step={1} value={barYear}
+                min={1965}
+                max={2024}
+                step={1}
+                value={barYear}
                 onChange={(e) => setBarYear(+e.target.value)}
                 style={{ flex: 1, minWidth: 0, accentColor: "var(--accent)" }}
               />
               <span>2024</span>
-              <span style={{ flexShrink: 0, color: "var(--text)", fontWeight: 600, fontSize: "clamp(12px, 3vw, 18px)" }}>
+              <span
+                style={{
+                  flexShrink: 0,
+                  color: "var(--text)",
+                  fontWeight: 600,
+                  fontSize: "clamp(12px, 3vw, 18px)",
+                }}
+              >
                 {barYear}
               </span>
-              
             </div>
             <ResponsiveContainer height={500} className="chart-wrapper">
-              <BarChart data={data} hoveredKey={hoveredKey} year={barYear} sortKey={barSortKey} />
+              <BarChart
+                data={data}
+                hoveredKey={hoveredKey}
+                year={barYear}
+                sortKey={barSortKey}
+              />
             </ResponsiveContainer>
           </section>
 
@@ -333,69 +449,97 @@ export default function App() {
         </div>
 
         {/* ── Country picker ── */}
-        <div style={{
-          position: "fixed",
-          top: pickerTop ?? headerHeight,
-          left: "32px",
-          width: "calc(100% - 64px)",
-          zIndex: 9,
-          transform: pickerTop !== null ? "translateY(0)" : "translateY(-110%)",
-          opacity: pickerTop !== null ? 1 : 0,
-          pointerEvents: pickerTop !== null ? "auto" : "none",
-          transition: "transform 0.25s ease, opacity 0.2s ease",
-        }}>
-          <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
+        <div
+          style={{
+            position: "fixed",
+            top: pickerTop ?? headerHeight,
+            left: "32px",
+            width: "calc(100% - 64px)",
+            zIndex: 9,
+            transform:
+              pickerTop !== null ? "translateY(0)" : "translateY(-110%)",
+            opacity: pickerTop !== null ? 1 : 0,
+            pointerEvents: pickerTop !== null ? "auto" : "none",
+            transition: "transform 0.25s ease, opacity 0.2s ease",
+          }}
+        >
+          <CountryPicker
+            selectedCountries={selectedCountries}
+            onSelect={selectCountry}
+          />
         </div>
         <div ref={pickerRef}>
-          <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
+          <CountryPicker
+            selectedCountries={selectedCountries}
+            onSelect={selectCountry}
+          />
         </div>
 
         {/* ── Row 2: 3 columns (independent y) ── */}
-        <div className="row-label">Independent Scale</div>
+        <div className="row-label">↓ Independent Scale ↓</div>
         <div className="charts-grid-3">
-          {selectedCountries.map((country) => (
-            <section key={country} className="chart-card">
-              <h2 className="section-heading">
-                <img
-                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-                  alt="" className="section-icon"
-                  style={{ borderRadius: "50%", objectFit: "cover" }}
-                />
-                {country} Energy Use
-              </h2>
-              <p className="chart-desc">By source · 1965 → 2024</p>
-              <ResponsiveContainer height={200} className="chart-wrapper">
-                <StackedAreaChart data={data} country={country} hoveredKey={hoveredKey} />
-              </ResponsiveContainer>
+          {selectedCountries.map((country, i) => (
+            <section key={i} className="chart-card">
+              {country ? (
+                <>
+                  <h2 className="section-heading">
+                    <img
+                      src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                      alt=""
+                      className="section-icon"
+                      style={{ borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    {country} Energy Use
+                  </h2>
+                  <p className="chart-desc">By source · 1965 → 2024</p>
+                  <ResponsiveContainer height={200} className="chart-wrapper">
+                    <StackedAreaChart
+                      data={data}
+                      country={country}
+                      hoveredKey={hoveredKey}
+                    />
+                  </ResponsiveContainer>
+                </>
+              ) : (
+                <div className="chart-empty">Select a country</div>
+              )}
             </section>
           ))}
         </div>
 
         {/* ── Row 3: 3 columns (shared y) ── */}
-        <div className="row-label">Fixed Scale</div>
-        <div className="charts-grid-3">
-          {selectedCountries.map((country) => (
-            <section key={country} className="chart-card">
-              <h2 className="section-heading">
-                <img
-                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-                  alt="" className="section-icon"
-                  style={{ borderRadius: "50%", objectFit: "cover" }}
-                />
-                {country} Energy Use
-              </h2>
-              <p className="chart-desc">By source · 1965 → 2024</p>
-              <ResponsiveContainer height={200} className="chart-wrapper">
-                <StackedAreaChart
-                  data={data} country={country}
-                  yMax={dynamicYMax} showBrackets={false}
-                  hoveredKey={hoveredKey}
-                />
-              </ResponsiveContainer>
+        <div className="row-label">↓ Fixed Scale ↓</div>
+        <div ref={chartsEndRef} className="charts-grid-3">
+          {selectedCountries.map((country, i) => (
+            <section key={i} className="chart-card">
+              {country ? (
+                <>
+                  <h2 className="section-heading">
+                    <img
+                      src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                      alt=""
+                      className="section-icon"
+                      style={{ borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    {country} Energy Use
+                  </h2>
+                  <p className="chart-desc">By source · 1965 → 2024</p>
+                  <ResponsiveContainer height={200} className="chart-wrapper">
+                    <StackedAreaChart
+                      data={data}
+                      country={country}
+                      yMax={dynamicYMax}
+                      showBrackets={false}
+                      hoveredKey={hoveredKey}
+                    />
+                  </ResponsiveContainer>
+                </>
+              ) : (
+                <div className="chart-empty">Select a country</div>
+              )}
             </section>
           ))}
         </div>
-        <div ref={chartsEndRef} />
 
         {/* ── Info band ── */}
         <div className="info-band">
