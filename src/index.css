@@ -248,12 +248,14 @@ svg text {
 
   .app-header {
     grid-template-columns: 1fr;
+    padding: 6px 0;
   }
 
   .sticky-legend {
     width: 100%;
   }
 }
+
 
 @media (max-width: 400px) {
   .sticky-legend {

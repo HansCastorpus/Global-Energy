@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useWindowWidth } from "./useWindowWidth";
 import ResponsiveContainer from "./ResponsiveContainer";
 import BarChart from "./BarChart";
 import StackedAreaChart from "./StackedAreaChart";
@@ -13,6 +14,8 @@ import introIcon from "./assets/introduction.svg";
 const sharedYMax = 50000;
 
 function CountryPicker({ selectedCountries, onSelect }) {
+  const windowWidth = useWindowWidth();
+  const compact = windowWidth < 500;
   return (
     <div style={{
       display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
@@ -47,7 +50,7 @@ function CountryPicker({ selectedCountries, onSelect }) {
               style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
               alt={country}
             />
-            {country}
+            {!compact && <span className="country-btn-label">{country}</span>}
           </button>
         );
       })}
