@@ -104,7 +104,7 @@ function SliderBar({ years, year, setYear }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 12,
-      padding: "10px 32px",
+      padding: "10px 0",
       background: "var(--surface)",
       borderBottom: "1px solid var(--border)",
       fontFamily: "var(--font-mono)", fontSize: 12,
@@ -115,9 +115,9 @@ function SliderBar({ years, year, setYear }) {
       <input type="range"
         min={years[0]} max={years[years.length - 1]} step={1} value={year}
         onChange={(e) => setYear(+e.target.value)}
-        style={{ flex: 1, accentColor: "var(--accent)" }} />
+        style={{ flex: 1, minWidth: 0, accentColor: "var(--accent)" }} />
       <span>{years[years.length - 1]}</span>
-      <span style={{ minWidth: 44, textAlign: "right", color: "var(--text)", fontWeight: 600, fontSize: 24 }}>
+      <span style={{ flexShrink: 0, color: "var(--text)", fontWeight: 600, fontSize: "clamp(12px, 3vw, 24px)" }}>
         {year}
       </span>
     </div>

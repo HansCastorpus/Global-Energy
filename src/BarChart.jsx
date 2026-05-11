@@ -13,10 +13,12 @@ export default function BarChart({
   margin = { top: 16, right: 32, bottom: 32, left: 140 },
   keys = ENERGY_KEYS,
   hoveredKey = null,
+  year = 2024,
+  sortKey = "coal",
 }) {
   const compact = width < 500;
   const effectiveMargin = compact
-    ? { ...margin, left: FLAG_W + FLAG_GAP * 2 + 4 }
+    ? { ...margin, left: FLAG_W + FLAG_GAP * 2 + 4, right: 8 }
     : margin;
 
   const innerW = width - effectiveMargin.left - effectiveMargin.right;
@@ -25,29 +27,21 @@ export default function BarChart({
   const op = (key) => (!hoveredKey || hoveredKey.has(key) ? 1 : 0.08);
 
   const { rows, xScale, yScale, xTicks } = useMemo(() => {
-    const countries = Array.from(
-      d3.group(
-        data.filter((d) => d.country !== "World"),
-        (d) => d.country,
-      ),
-      ([country, records]) => {
-        const totals = {};
+    const countries = data
+      .filter((d) => d.country !== "World" && d.year === year)
+      .map((d) => {
         let grand = 0;
-        for (const key of keys) {
-          const sum = d3.sum(records, (r) => r[key]);
-          totals[key] = sum;
-          grand += sum;
-        }
+        for (const key of keys) grand += d[key] ?? 0;
         const props = {};
         for (const key of keys)
-          props[key] = grand > 0 ? totals[key] / grand : 0;
-        return { country, ...props };
-      },
-    );
+          props[key] = grand > 0 ? (d[key] ?? 0) / grand : 0;
+        return { country: d.country, ...props };
+      });
 
-    countries.sort((a, b) => d3.descending(a.coal, b.coal));
+    countries.sort((a, b) => d3.descending(a[sortKey], b[sortKey]));
 
-    const series = d3.stack().keys(keys)(countries);
+    const orderedKeys = [sortKey, ...keys.filter((k) => k !== sortKey)];
+    const series = d3.stack().keys(orderedKeys)(countries);
 
     const xScale = d3.scaleLinear().domain([0, 1]).range([0, innerW]);
     const yScale = d3
@@ -67,7 +61,7 @@ export default function BarChart({
     }));
 
     return { rows, xScale, yScale, xTicks: xScale.ticks(compact ? 3 : 5) };
-  }, [data, innerW, innerH, keys, compact]);
+  }, [data, innerW, innerH, keys, compact, year, sortKey]);
 
   const pct = d3.format(".0%");
 

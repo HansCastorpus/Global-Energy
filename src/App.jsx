@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import ResponsiveContainer from "./ResponsiveContainer";
 import BarChart from "./BarChart";
 import StackedAreaChart from "./StackedAreaChart";
@@ -10,14 +10,38 @@ import LineChart from "./LineChart";
 import { PALETTE, ENERGY_KEYS } from "./constants";
 import CirclePack from "./CirclePack";
 import introIcon from "./assets/introduction.svg";
-import frflag from "./assets/France.png";
-import usflag from "./assets/United States.png";
-import chflag from "./assets/China.png";
-
 const sharedYMax = 50000;
+
+const COUNTRIES_WITH_FLAGS = [
+  "Argentina", "Australia", "Brazil", "Canada", "China",
+  "Egypt", "France", "Germany", "India", "Indonesia",
+  "Iran", "Italy", "Japan", "Malaysia", "Mexico",
+  "Poland", "Saudi Arabia", "South Africa", "South Korea", "Spain",
+  "Thailand", "Turkey", "United Arab Emirates", "United Kingdom", "United States", "Vietnam",
+];
 
 export default function App() {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
+  const [barYear, setBarYear] = useState(2024);
+  const [barSortKey, setBarSortKey] = useState("coal");
+  const [selectedCountries, setSelectedCountries] = useState(["United States", "France", "China"]);
+
+  const selectCountry = (country) => {
+    setSelectedCountries((prev) => {
+      if (prev.includes(country)) return prev;
+      return [...prev.slice(1), country];
+    });
+  };
+
+  const dynamicYMax = useMemo(() => {
+    let max = 0;
+    for (const d of data) {
+      if (!selectedCountries.includes(d.country)) continue;
+      const total = ENERGY_KEYS.reduce((sum, k) => sum + (d[k] ?? 0), 0);
+      if (total > max) max = total;
+    }
+    return max;
+  }, [selectedCountries]);
 
   const toggleKey = (key) => {
     setSelectedKeys((prev) => {
@@ -150,9 +174,50 @@ export default function App() {
         {/* ── Row 1: 2 columns ── */}
         <div className="charts-grid-2">
           <section className="chart-card">
-            <h2 className="chart-title">Energy Mix by Country</h2>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 0 }}>
+              <h2 className="chart-title">Energy Mix by Country</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
+                  Top Energy User
+                </span>
+                <select
+                  value={barSortKey}
+                  onChange={(e) => setBarSortKey(e.target.value)}
+                  style={{
+                    fontFamily: "var(--font-mono)", fontSize: 11,
+                    color: "var(--text-muted)", background: "var(--surface)",
+                    border: "1px solid var(--border)", padding: "2px 6px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {ENERGY_KEYS.map((k) => (
+                    <option key={k} value={k}>{k.replace(/_/g, " ")}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "10px 0",
+              fontFamily: "var(--font-mono)", fontSize: 12,
+              color: "var(--text-muted)",
+              width: "100%",
+            }}>
+              <span>1965</span>
+              <input
+                type="range"
+                min={1965} max={2024} step={1} value={barYear}
+                onChange={(e) => setBarYear(+e.target.value)}
+                style={{ flex: 1, minWidth: 0, accentColor: "var(--accent)" }}
+              />
+              <span>2024</span>
+              <span style={{ flexShrink: 0, color: "var(--text)", fontWeight: 600, fontSize: "clamp(12px, 3vw, 18px)" }}>
+                {barYear}
+              </span>
+              
+            </div>
             <ResponsiveContainer height={500} className="chart-wrapper">
-              <BarChart data={data} hoveredKey={hoveredKey} />
+              <BarChart data={data} hoveredKey={hoveredKey} year={barYear} sortKey={barSortKey} />
             </ResponsiveContainer>
           </section>
 
@@ -188,105 +253,85 @@ export default function App() {
           </div>
         </div>
 
-        {/* ── Row 2: 3 columns ── */}
-        <div className="charts-grid-3">
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={usflag} alt="" className="section-icon" />
-              USA Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="United States"
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
-
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={frflag} alt="" className="section-icon" />
-              France Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="France"
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
-
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={chflag} alt="" className="section-icon" />
-              China Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="China"
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
+        {/* ── Country picker ── */}
+        <div style={{
+          display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
+          padding: "12px 16px",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+        }}>
+          {COUNTRIES_WITH_FLAGS.map((country) => {
+            const isSelected = selectedCountries.includes(country);
+            return (
+              <button
+                key={country}
+                onClick={() => selectCountry(country)}
+                className="country-btn"
+                data-selected={isSelected}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                  padding: "5px 7px",
+                  background: isSelected ? "var(--btn-pressed)" : "transparent",
+                  border: isSelected ? "1px solid var(--border)" : "1px solid transparent",
+                  cursor: isSelected ? "default" : "pointer",
+                  fontFamily: "var(--font-mono)", fontSize: 9,
+                  color: isSelected ? "var(--text)" : "var(--text-muted)",
+                }}
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                  width={14} height={14}
+                  style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
+                  alt={country}
+                />
+                {country}
+              </button>
+            );
+          })}
         </div>
 
+        {/* ── Row 2: 3 columns (independent y) ── */}
         <div className="charts-grid-3">
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={usflag} alt="" className="section-icon" />
-              USA Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="United States"
-                yMax={sharedYMax}
-                showBrackets={false}
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
+          {selectedCountries.map((country) => (
+            <section key={country} className="chart-card">
+              <h2 className="section-heading">
+                <img
+                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                  alt="" className="section-icon"
+                  style={{ borderRadius: "50%", objectFit: "cover" }}
+                />
+                {country} Energy Mix
+              </h2>
+              <p className="chart-desc">By source · 1965 → 2024</p>
+              <ResponsiveContainer height={200} className="chart-wrapper">
+                <StackedAreaChart data={data} country={country} hoveredKey={hoveredKey} />
+              </ResponsiveContainer>
+            </section>
+          ))}
+        </div>
 
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={frflag} alt="" className="section-icon" />
-              France Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="France"
-                yMax={sharedYMax}
-                showBrackets={false}
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
-
-          <section className="chart-card">
-            <h2 className="section-heading">
-              <img src={chflag} alt="" className="section-icon" />
-              China Energy Mix
-            </h2>
-            <p className="chart-desc">By source · 1965 → 2024</p>
-            <ResponsiveContainer height={200} className="chart-wrapper">
-              <StackedAreaChart
-                data={data}
-                country="China"
-                yMax={sharedYMax}
-                showBrackets={false}
-                hoveredKey={hoveredKey}
-              />
-            </ResponsiveContainer>
-          </section>
+        {/* ── Row 3: 3 columns (shared y) ── */}
+        <div className="charts-grid-3">
+          {selectedCountries.map((country) => (
+            <section key={country} className="chart-card">
+              <h2 className="section-heading">
+                <img
+                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                  alt="" className="section-icon"
+                  style={{ borderRadius: "50%", objectFit: "cover" }}
+                />
+                {country} Energy Mix
+              </h2>
+              <p className="chart-desc">By source · 1965 → 2024</p>
+              <ResponsiveContainer height={200} className="chart-wrapper">
+                <StackedAreaChart
+                  data={data} country={country}
+                  yMax={dynamicYMax} showBrackets={false}
+                  hoveredKey={hoveredKey}
+                />
+              </ResponsiveContainer>
+            </section>
+          ))}
         </div>
 
         {/* ── Info band ── */}

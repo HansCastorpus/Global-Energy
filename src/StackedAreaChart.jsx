@@ -110,6 +110,7 @@ export default function StackedAreaChart({
       if (!groupKeys.length) return null;
       const top    = Math.min(...groupKeys.map((k) => keyPixels[k][1]));
       const bottom = Math.max(...groupKeys.map((k) => keyPixels[k][0]));
+      if (bottom - top < 1) return null;
       const mid    = (top + bottom) / 2;
       return { label: group.label, top, bottom, mid };
     }).filter(Boolean);

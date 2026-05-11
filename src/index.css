@@ -302,8 +302,15 @@ svg text {
   font-size: 18px;
 }
 
+.country-btn:not([data-selected="true"]):hover {
+  background: var(--btn-pressed);
+  border-color: var(--border);
+}
+
 .section-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
+  width: 14px;
+  height: 14px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 0.5px solid var(--border);
 }
