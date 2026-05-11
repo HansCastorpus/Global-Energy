@@ -333,11 +333,19 @@ export default function App() {
         </div>
 
         {/* ── Country picker ── */}
-        {pickerTop !== null && (
-          <div style={{ position: "fixed", top: pickerTop, left: "32px", width: "calc(100% - 64px)", zIndex: 9 }}>
-            <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
-          </div>
-        )}
+        <div style={{
+          position: "fixed",
+          top: pickerTop ?? headerHeight,
+          left: "32px",
+          width: "calc(100% - 64px)",
+          zIndex: 9,
+          transform: pickerTop !== null ? "translateY(0)" : "translateY(-110%)",
+          opacity: pickerTop !== null ? 1 : 0,
+          pointerEvents: pickerTop !== null ? "auto" : "none",
+          transition: "transform 0.25s ease, opacity 0.2s ease",
+        }}>
+          <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
+        </div>
         <div ref={pickerRef}>
           <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
         </div>

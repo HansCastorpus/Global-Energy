@@ -161,11 +161,19 @@ export default function CirclePack({ data = [], hoveredKey = null, headerHeight 
   return (
     <div ref={ref} style={{ width: "100%" }}>
 
-      {sliderFixed && (
-        <div style={{ position: "fixed", top: headerHeight, left: legendLeft, width: legendWidth, zIndex: 9 }}>
-          <SliderBar years={years} year={year} setYear={setYear} />
-        </div>
-      )}
+      <div style={{
+        position: "fixed",
+        top: headerHeight,
+        left: legendLeft,
+        width: legendWidth,
+        zIndex: 9,
+        transform: sliderFixed ? "translateY(0)" : "translateY(-110%)",
+        opacity: sliderFixed ? 1 : 0,
+        pointerEvents: sliderFixed ? "auto" : "none",
+        transition: "transform 0.25s ease, opacity 0.2s ease",
+      }}>
+        <SliderBar years={years} year={year} setYear={setYear} />
+      </div>
 
       <div ref={sliderRef}>
         <SliderBar years={years} year={year} setYear={setYear} />
