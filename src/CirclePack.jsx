@@ -146,15 +146,14 @@ export default function CirclePack({ data = [], hoveredKey = null, headerHeight 
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setSliderFixed(!entry.isIntersecting && entry.boundingClientRect.top < 0);
-      },
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    const check = () => {
+      const { top } = el.getBoundingClientRect();
+      setSliderFixed(top < headerHeight);
+    };
+    window.addEventListener("scroll", check, { passive: true });
+    check();
+    return () => window.removeEventListener("scroll", check);
+  }, [headerHeight]);
 
   const COLS     = width >= 1500 ? 10 : width >= 900 ? 6 : 3;
   const cellSize = width > 0 ? Math.floor(width / COLS) : 0;

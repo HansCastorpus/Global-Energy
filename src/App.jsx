@@ -12,6 +12,49 @@ import CirclePack from "./CirclePack";
 import introIcon from "./assets/introduction.svg";
 const sharedYMax = 50000;
 
+function CountryPicker({ selectedCountries, onSelect }) {
+  return (
+    <div style={{
+      display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
+      padding: 0,
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+    }}>
+      {COUNTRIES_WITH_FLAGS.map((country) => {
+        const isSelected = selectedCountries.includes(country);
+        return (
+          <button
+            key={country}
+            onClick={() => onSelect(country)}
+            className="country-btn"
+            data-selected={isSelected}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              padding: "5px 7px",
+              background: isSelected ? "var(--btn-pressed)" : "transparent",
+              borderTop: "none",
+              borderBottom: "none",
+              borderLeft: isSelected ? "1px solid var(--border)" : "1px solid transparent",
+              borderRight: isSelected ? "1px solid var(--border)" : "1px solid transparent",
+              cursor: isSelected ? "default" : "pointer",
+              fontFamily: "var(--font-mono)",
+              color: isSelected ? "var(--text)" : "var(--text-muted)",
+            }}
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+              width={14} height={14}
+              style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
+              alt={country}
+            />
+            {country}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const COUNTRIES_WITH_FLAGS = [
   "Argentina", "Australia", "Brazil", "Canada", "China",
   "Egypt", "France", "Germany", "India", "Indonesia",
@@ -32,6 +75,22 @@ export default function App() {
       return [...prev.slice(1), country];
     });
   };
+
+  const pickerRef = useRef(null);
+  const chartsEndRef = useRef(null);
+  const [pickerFixed, setPickerFixed] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const pickerBottom = pickerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const chartsEndTop = chartsEndRef.current?.getBoundingClientRect().top ?? Infinity;
+      setPickerFixed(pickerBottom < headerBottom && chartsEndTop > headerBottom);
+    };
+    window.addEventListener("scroll", check, { passive: true });
+    check();
+    return () => window.removeEventListener("scroll", check);
+  }, []);
 
   const dynamicYMax = useMemo(() => {
     let max = 0;
@@ -175,7 +234,7 @@ export default function App() {
         <div className="charts-grid-2">
           <section className="chart-card">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 0 }}>
-              <h2 className="chart-title">Energy Mix by Country</h2>
+              <h2 className="chart-title">Energy Use by Country</h2>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
                   Top Energy User
@@ -224,7 +283,7 @@ export default function App() {
           <section className="chart-card">
             <h2 className="section-heading">
               <img src={introIcon} alt="" className="section-icon" />
-              World Energy Mix
+              World Energy Use
             </h2>
             <ResponsiveContainer height={500} className="chart-wrapper">
               <StackedAreaChart
@@ -254,43 +313,17 @@ export default function App() {
         </div>
 
         {/* ── Country picker ── */}
-        <div style={{
-          display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
-          padding: "12px 16px",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-        }}>
-          {COUNTRIES_WITH_FLAGS.map((country) => {
-            const isSelected = selectedCountries.includes(country);
-            return (
-              <button
-                key={country}
-                onClick={() => selectCountry(country)}
-                className="country-btn"
-                data-selected={isSelected}
-                style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                  padding: "5px 7px",
-                  background: isSelected ? "var(--btn-pressed)" : "transparent",
-                  border: isSelected ? "1px solid var(--border)" : "1px solid transparent",
-                  cursor: isSelected ? "default" : "pointer",
-                  fontFamily: "var(--font-mono)", fontSize: 9,
-                  color: isSelected ? "var(--text)" : "var(--text-muted)",
-                }}
-              >
-                <img
-                  src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-                  width={14} height={14}
-                  style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
-                  alt={country}
-                />
-                {country}
-              </button>
-            );
-          })}
+        {pickerFixed && (
+          <div style={{ position: "fixed", top: headerHeight, left: "32px", width: "calc(100% - 64px)", zIndex: 9 }}>
+            <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
+          </div>
+        )}
+        <div ref={pickerRef}>
+          <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
         </div>
 
         {/* ── Row 2: 3 columns (independent y) ── */}
+        <div className="row-label">Independent Scale</div>
         <div className="charts-grid-3">
           {selectedCountries.map((country) => (
             <section key={country} className="chart-card">
@@ -300,7 +333,7 @@ export default function App() {
                   alt="" className="section-icon"
                   style={{ borderRadius: "50%", objectFit: "cover" }}
                 />
-                {country} Energy Mix
+                {country} Energy Use
               </h2>
               <p className="chart-desc">By source · 1965 → 2024</p>
               <ResponsiveContainer height={200} className="chart-wrapper">
@@ -311,6 +344,7 @@ export default function App() {
         </div>
 
         {/* ── Row 3: 3 columns (shared y) ── */}
+        <div className="row-label">Fixed Scale</div>
         <div className="charts-grid-3">
           {selectedCountries.map((country) => (
             <section key={country} className="chart-card">
@@ -320,7 +354,7 @@ export default function App() {
                   alt="" className="section-icon"
                   style={{ borderRadius: "50%", objectFit: "cover" }}
                 />
-                {country} Energy Mix
+                {country} Energy Use
               </h2>
               <p className="chart-desc">By source · 1965 → 2024</p>
               <ResponsiveContainer height={200} className="chart-wrapper">
@@ -333,6 +367,7 @@ export default function App() {
             </section>
           ))}
         </div>
+        <div ref={chartsEndRef} />
 
         {/* ── Info band ── */}
         <div className="info-band">
@@ -403,7 +438,7 @@ export default function App() {
           <section className="chart-card">
             <h2 className="section-heading">
               <img src={introIcon} alt="" className="section-icon" />
-              Energy Mix by Country
+              Energy Use by Country
             </h2>
             <p className="chart-desc">
               Proportional source breakdown · select a year
