@@ -279,28 +279,18 @@ export default function App() {
             <div className="info-band-text">
               <p>
                 Energy is the essential element of our modern world. It allows
-                us to achieve the great things we set our mind to. It also leads
-                us to destroy our own environment. New cleaner energy is
-                appearing and will hopefully replace in the long term energies
-                that pollute and destroy the environment. Though we do see that
-                while the share of renewable energies have increased, so have
-                fossil fuels. Their share decreases, but the quantity increases.
-                This overall energy use has continuously increased for the last
-                few decades with no sign of stopping. Who uses what? How much?
-                This data visualization looks at this use through a series of
-                different graphs. The legend serves as a filter for specific
-                energy viewing. Energy is the essential element of our modern
-                world. It allows us to achieve the great things we set our mind
-                to. It also leads us to destroy our own environment. New cleaner
-                energy is appearing and will hopefully replace in the long term
-                energies that pollute and destroy the environment. Though we do
-                see that while the share of renewable energies have increased,
-                so have fossil fuels. Their share decreases, but the quantity
-                increases. This overall energy use has continuously increased
-                for the last few decades with no sign of stopping. Who uses
-                what? How much? This data visualization looks at this use
+                us to achieve the great things we set our minds to. It also
+                contributes to the destruction of our environment. New, cleaner
+                sources of energy are emerging and will hopefully replace, in
+                the long term, the energy sources that pollute and damage the
+                environment. However, while the share of renewable energy has
+                increased, the use of fossil fuels has also continued to rise.
+                Their proportion decreases, but the overall quantity increases.
+                Global energy consumption has continuously grown over the last
+                few decades, with no sign of slowing down. Who uses what? How
+                much? This data visualization explores global energy consumption
                 through a series of different graphs. The legend serves as a
-                filter for specific energy viewing.
+                filter for viewing specific energy sources.
               </p>
             </div>
           </div>

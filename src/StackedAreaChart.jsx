@@ -21,8 +21,6 @@ const BRACKET_W        = 6;
 const LABEL_OFFSET     = 11;
 const LABEL_FONT_SIZE  = 10;
 
-const BRACKET_ABBR = { Fossil: "FSL", Nuclear: "NCLR", Renewable: "RNWBL" };
-
 export default function StackedAreaChart({
   data = [],
   width = 600,
@@ -36,10 +34,8 @@ export default function StackedAreaChart({
 }) {
   const windowWidth = useWindowWidth();
 
-  const compact = width < 500;
-
   // Tighter margins on narrow screens
-  const margin = compact
+  const margin = width < 500
     ? { top: 16, right: showBrackets ? 60 : 8, bottom: 36, left: 44 }
     : marginProp;
 
@@ -110,7 +106,6 @@ export default function StackedAreaChart({
       if (!groupKeys.length) return null;
       const top    = Math.min(...groupKeys.map((k) => keyPixels[k][1]));
       const bottom = Math.max(...groupKeys.map((k) => keyPixels[k][0]));
-      if (bottom - top < 1) return null;
       const mid    = (top + bottom) / 2;
       return { label: group.label, top, bottom, mid };
     }).filter(Boolean);
@@ -216,7 +211,7 @@ export default function StackedAreaChart({
               textAnchor="start" dominantBaseline="middle"
               fill="var(--text-muted)" fontSize={LABEL_FONT_SIZE}
               fontFamily="var(--font-sans)" letterSpacing="0.06em">
-              {compact ? BRACKET_ABBR[b.label] : b.label.toUpperCase()}
+              {b.label.toUpperCase()}
             </text>
           </g>
         ))}
