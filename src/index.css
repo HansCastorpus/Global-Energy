@@ -19,6 +19,16 @@
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Page border ────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  border: 2px solid var(--border);
+  pointer-events: none;
+  z-index: 9999;
+}
+
 /* ── Reset ──────────────────────────────────────────────── */
 *,
 *::before,
@@ -280,6 +290,18 @@ svg text {
   }
 }
 
+/* ── Scale toggle buttons ────────────────────────────────── */
+.scale-btn {
+  background: transparent;
+}
+.scale-btn[data-active="true"] {
+  background: var(--btn-pressed);
+}
+.scale-btn:not([data-active="true"]):hover {
+  background: var(--btn-highlighted);
+  color: var(--text);
+}
+
 /* ── Legend button interaction ───────────────────────────── */
 .legend-btn {
   cursor: pointer;
@@ -343,7 +365,7 @@ svg text {
 }
 
 .country-btn:not([data-selected="true"]):hover img {
-  border: 1.5px solid var(--text) !important;
+  border: 1px solid var(--text) !important;
   box-shadow: 0 0 0 2px var(--btn-pressed), 0 0 6px rgba(0,0,0,0.25);
   transform: scale(1.10);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -379,5 +401,5 @@ svg text {
   height: 14px;
   object-fit: cover;
   border-radius: 50%;
-  border: 0.5px solid var(--border);
+  border: 1px solid var(--border);
 }

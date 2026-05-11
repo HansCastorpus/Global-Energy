@@ -47,13 +47,13 @@ function CountryCircle({ country, data, year, size, hoveredKey }) {
         {/* Pie wedges */}
         {wedges.map((w) => (
           <path key={w.key} d={w.path} fill={w.fill}
-            stroke="var(--bg)" strokeWidth={0.8}
+            stroke="var(--bg)" strokeWidth={1}
             opacity={!hoveredKey || hoveredKey.has(w.key) ? 0.9 : 0.08}
             style={{ transition: "opacity 0.2s" }} />
         ))}
 
         {/* Circle border */}
-        <circle r={r} fill="none" stroke="var(--border)" strokeWidth={0.8} />
+        <circle r={r} fill="none" stroke="var(--border)" strokeWidth={1} />
 
         {/* Label group: [flag circle] [GAP] [country name] — centered under circle */}
         <g transform={`translate(${groupX}, 0)`}>
@@ -78,7 +78,7 @@ function CountryCircle({ country, data, year, size, hoveredKey }) {
             r={FLAG_SIZE / 2}
             fill="none"
             stroke="var(--border)"
-            strokeWidth={0.8}
+            strokeWidth={1}
           />
 
           {/* Country name — exactly GAP px to the right of the flag circle */}

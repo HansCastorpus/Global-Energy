@@ -21,6 +21,8 @@ const BRACKET_W        = 6;
 const LABEL_OFFSET     = 11;
 const LABEL_FONT_SIZE  = 10;
 
+const BRACKET_ABBR = { Fossil: "FSL", Nuclear: "NCLR", Renewable: "RNWBL" };
+
 export default function StackedAreaChart({
   data = [],
   width = 600,
@@ -34,8 +36,10 @@ export default function StackedAreaChart({
 }) {
   const windowWidth = useWindowWidth();
 
+  const compact = width < 500;
+
   // Tighter margins on narrow screens
-  const margin = width < 500
+  const margin = compact
     ? { top: 16, right: showBrackets ? 60 : 8, bottom: 36, left: 44 }
     : marginProp;
 
@@ -106,6 +110,7 @@ export default function StackedAreaChart({
       if (!groupKeys.length) return null;
       const top    = Math.min(...groupKeys.map((k) => keyPixels[k][1]));
       const bottom = Math.max(...groupKeys.map((k) => keyPixels[k][0]));
+      if (bottom - top < 1) return null;
       const mid    = (top + bottom) / 2;
       return { label: group.label, top, bottom, mid };
     }).filter(Boolean);
@@ -159,7 +164,7 @@ export default function StackedAreaChart({
             return (
               <g key={yearStr}>
                 <line x1={x} x2={x} y1={0} y2={innerH}
-                  stroke="var(--text-dim)" strokeWidth={0.8} strokeDasharray="3 3" />
+                  stroke="var(--text-dim)" strokeWidth={1} strokeDasharray="3 3" />
                 {!skipLabel && labelLines.map((line, li) => (
                   <text key={li} x={x - 5 + 3} y={-6 - (labelLines.length - 1 - li) * 12}
                     fill={li === 0 ? "var(--text)" : "var(--text-muted)"}
@@ -174,7 +179,7 @@ export default function StackedAreaChart({
         })()}
 
         {/* X axis */}
-        <line x1={0} x2={innerW} y1={innerH} y2={innerH} stroke="var(--axis)" strokeWidth={1.5} />
+        <line x1={0} x2={innerW} y1={innerH} y2={innerH} stroke="var(--axis)" strokeWidth={1} />
         {xTicks.map((year) => (
           <text key={year} x={xScale(year)} y={innerH + 14} dy="0.71em"
             textAnchor="middle" fill="var(--text-muted)"
@@ -184,7 +189,7 @@ export default function StackedAreaChart({
         ))}
 
         {/* Y axis */}
-        <line x1={0} x2={0} y1={0} y2={innerH} stroke="var(--axis)" strokeWidth={1.5} />
+        <line x1={0} x2={0} y1={0} y2={innerH} stroke="var(--axis)" strokeWidth={1} />
         {yTicks.map((t) => (
           <text key={t} x={-10} y={yScale(t)} dy="0.32em"
             textAnchor="end" fill="var(--text-muted)"
@@ -211,7 +216,7 @@ export default function StackedAreaChart({
               textAnchor="start" dominantBaseline="middle"
               fill="var(--text-muted)" fontSize={LABEL_FONT_SIZE}
               fontFamily="var(--font-sans)" letterSpacing="0.06em">
-              {b.label.toUpperCase()}
+              {compact ? BRACKET_ABBR[b.label] : b.label.toUpperCase()}
             </text>
           </g>
         ))}

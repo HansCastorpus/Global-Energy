@@ -136,21 +136,33 @@ export default function AlluvialChartPct({
           ))
         )}
 
-        {columns.map((col) => {
-          const lines = LABELS[col.year] || [String(col.year)];
-          return (
-            <g key={col.year} transform={`translate(${col.x + col.nodeWidth / 2}, -12)`}>
-              {lines.map((line, li) => (
-                <text key={li} y={-li * 13} textAnchor="middle"
-                  fill={li === 0 ? "var(--text)" : "var(--text-muted)"}
-                  fontSize={li === 0 ? 11 : 8} fontFamily="var(--font-mono)"
-                  fontWeight={li === 0 ? 600 : 400}>
-                  {line}
-                </text>
-              ))}
-            </g>
-          );
-        })}
+        {(() => {
+          const col73 = columns.find((c) => c.year === 1973);
+          const col79 = columns.find((c) => c.year === 1979);
+          const mergeOilCrises = col73 && col79 && (col79.x - col73.x) < 70;
+
+          return columns.map((col) => {
+            if (mergeOilCrises && col.year === 1979) return null;
+
+            let lines = LABELS[col.year] || [String(col.year)];
+            if (mergeOilCrises && col.year === 1973) {
+              lines = ["1973 · 1979", "Oil Crises"];
+            }
+
+            return (
+              <g key={col.year} transform={`translate(${col.x + col.nodeWidth / 2}, -12)`}>
+                {lines.map((line, li) => (
+                  <text key={li} y={-li * 13} textAnchor="middle"
+                    fill={li === 0 ? "var(--text)" : "var(--text-muted)"}
+                    fontSize={li === 0 ? 11 : 8} fontFamily="var(--font-mono)"
+                    fontWeight={li === 0 ? 600 : 400}>
+                    {line}
+                  </text>
+                ))}
+              </g>
+            );
+          });
+        })()}
 
         {columns[0]?.nodes.map((node) => {
           if (node.y1 - node.y0 < 8) return null;
@@ -191,7 +203,7 @@ export default function AlluvialChartPct({
             <g key={key}>
               <line x1={lastCol.x + lastCol.nodeWidth} y1={naturalY}
                 x2={labelX - 2} y2={y}
-                stroke={PALETTE[key]} strokeWidth={0.8} opacity={0.6} />
+                stroke={PALETTE[key]} strokeWidth={1} opacity={0.6} />
               <rect x={labelX} y={y - 4} width={8} height={8} rx={1}
                 fill={PALETTE[key]}
                 opacity={op(key)} style={{ transition: "opacity 0.2s" }} />

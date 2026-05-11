@@ -163,7 +163,7 @@ export default function LineChart({
                   y1={0}
                   y2={innerH}
                   stroke="var(--text-dim)"
-                  strokeWidth={0.8}
+                  strokeWidth={1}
                   strokeDasharray="3 3"
                 />
                 {!skipLabel && labelLines.map((line, li) => (
@@ -233,7 +233,7 @@ export default function LineChart({
               r={6}
               fill="none"
               stroke="var(--border)"
-              strokeWidth={0.8}
+              strokeWidth={1}
             />
             {!compact && (
               <text
@@ -257,7 +257,7 @@ export default function LineChart({
           y1={innerH}
           y2={innerH}
           stroke="var(--axis)"
-          strokeWidth={1.5}
+          strokeWidth={1}
         />
         {xTicks.map((t) => (
           <text
@@ -281,7 +281,7 @@ export default function LineChart({
           y1={0}
           y2={innerH}
           stroke="var(--axis)"
-          strokeWidth={1.5}
+          strokeWidth={1}
         />
         {yTicks.map((t) => (
           <text

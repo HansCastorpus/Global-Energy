@@ -14,27 +14,29 @@ const sharedYMax = 50000;
 
 function CountryPicker({ selectedCountries, onSelect }) {
   const containerRef = useRef(null);
-  const [showNames, setShowNames] = useState(true);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new ResizeObserver(() => {
-      // 26 buttons × ~69px each needs ~900px for 2 rows; below that names cause 3 rows
-      setShowNames(el.getBoundingClientRect().width >= 900);
+      setContainerWidth(el.getBoundingClientRect().width);
     });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
+  const showNames = containerWidth >= 900;
+  // 26 countries: 26 cols (1 row) with names, 13 cols (2 rows) mid, 7 cols (4 rows) narrow
+  const cols = containerWidth === 0 ? 13 : showNames ? 26 : containerWidth < 450 ? 7 : 13;
+
   return (
     <div
       ref={containerRef}
       style={{
-        display: "flex",
-        flexWrap: "wrap",
+        display: "grid",
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gap: 0,
-        justifyContent: "center",
         padding: 0,
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -52,8 +54,10 @@ function CountryPicker({ selectedCountries, onSelect }) {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              justifyContent: "center",
               gap: 3,
-              padding: "5px 7px",
+              width: "100%",
+              padding: "5px 0",
               background: isSelected ? "var(--btn-pressed)" : "transparent",
               borderTop: "none",
               borderBottom: "none",
@@ -75,11 +79,11 @@ function CountryPicker({ selectedCountries, onSelect }) {
               style={{
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: "0.5px solid var(--border)",
+                border: "1px solid var(--border)",
               }}
               alt={country}
             />
-            {showNames && <span style={{ fontSize: 9 }}>{country}</span>}
+            {showNames && <span style={{ fontSize: containerWidth >= 1100 ? 11 : 9 }}>{country === "United Arab Emirates" ? "UAE" : country}</span>}
           </button>
         );
       })}
@@ -125,6 +129,7 @@ export default function App() {
     "France",
     "China",
   ]);
+  const [scaleMode, setScaleMode] = useState("independent");
 
   const selectCountry = (country) => {
     setSelectedCountries((prev) => {
@@ -429,11 +434,11 @@ export default function App() {
           </div>
           <div className="info-band-text">
             <p>
-              These six stacked area charts compare the energy usage over the
-              last six decades of France, the United States and China. The first
-              row shows each country's usage with an independent scale on the
-              y-axis for each. The second row fixes the scales on the y-axis to
-              show the vast discrepancies between the different sized economies.
+              These stacked area charts compare the energy usage over the last
+              six decades for the selected countries. Toggle between independent
+              scales — each country on its own axis — and a fixed shared scale
+              to reveal the vast discrepancies between differently sized
+              economies.
             </p>
           </div>
         </div>
@@ -465,70 +470,73 @@ export default function App() {
           />
         </div>
 
-        {/* ── Row 2: 3 columns (independent y) ── */}
-        <div className="row-label">↓ Independent Scale ↓</div>
-        <div className="charts-grid-3">
-          {selectedCountries.map((country, i) => (
-            <section key={i} className="chart-card">
-              {country ? (
-                <>
-                  <h2 className="section-heading">
-                    <img
-                      src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-                      alt=""
-                      className="section-icon"
-                      style={{ borderRadius: "50%", objectFit: "cover" }}
-                    />
-                    {country} Energy Use
-                  </h2>
-                  <p className="chart-desc">By source · 1965 → 2024</p>
-                  <ResponsiveContainer height={200} className="chart-wrapper">
-                    <StackedAreaChart
-                      data={data}
-                      country={country}
-                      hoveredKey={hoveredKey}
-                    />
-                  </ResponsiveContainer>
-                </>
-              ) : (
-                <div className="chart-empty">Select a country</div>
-              )}
-            </section>
-          ))}
-        </div>
+        {/* ── Scale toggle + charts ── */}
+        <div style={{ border: "0px solid var(--border)" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0,
+            borderBottom: "1px solid var(--border)",
+            background: "var(--bg)",
+          }}>
+            {[
+              { key: "independent", label: "Independent Scale" },
+              { key: "fixed", label: "Fixed Scale" },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setScaleMode(key)}
+                className="scale-btn"
+                data-active={scaleMode === key}
+                style={{
+                  flex: 1,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: scaleMode === key ? "var(--text)" : "var(--text-dim)",
+                  border: "none",
+                  padding: "8px 20px",
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-        {/* ── Row 3: 3 columns (shared y) ── */}
-        <div className="row-label">↓ Fixed Scale ↓</div>
-        <div ref={chartsEndRef} className="charts-grid-3">
-          {selectedCountries.map((country, i) => (
-            <section key={i} className="chart-card">
-              {country ? (
-                <>
-                  <h2 className="section-heading">
-                    <img
-                      src={`${import.meta.env.BASE_URL}flags/${country}.png`}
-                      alt=""
-                      className="section-icon"
-                      style={{ borderRadius: "50%", objectFit: "cover" }}
-                    />
-                    {country} Energy Use
-                  </h2>
-                  <p className="chart-desc">By source · 1965 → 2024</p>
-                  <ResponsiveContainer height={200} className="chart-wrapper">
-                    <StackedAreaChart
-                      data={data}
-                      country={country}
-                      yMax={dynamicYMax}
-                      showBrackets={false}
-                      hoveredKey={hoveredKey}
-                    />
-                  </ResponsiveContainer>
-                </>
-              ) : (
-                <div className="chart-empty">Select a country</div>
-              )}
-            </section>
-          ))}
+          <div ref={chartsEndRef} className="charts-grid-3">
+            {selectedCountries.map((country, i) => (
+              <section key={i} className="chart-card">
+                {country ? (
+                  <>
+                    <h2 className="section-heading">
+                      <img
+                        src={`${import.meta.env.BASE_URL}flags/${country}.png`}
+                        alt=""
+                        className="section-icon"
+                        style={{ borderRadius: "50%", objectFit: "cover" }}
+                      />
+                      {country} Energy Use
+                    </h2>
+                    <p className="chart-desc">By source · 1965 → 2024</p>
+                    <ResponsiveContainer height={200} className="chart-wrapper">
+                      <StackedAreaChart
+                        data={data}
+                        country={country}
+                        yMax={scaleMode === "fixed" ? dynamicYMax : null}
+                        showBrackets={scaleMode === "independent"}
+                        hoveredKey={hoveredKey}
+                      />
+                    </ResponsiveContainer>
+                  </>
+                ) : (
+                  <div className="chart-empty">Select a country</div>
+                )}
+              </section>
+            ))}
+          </div>
         </div>
 
         {/* ── Info band ── */}

@@ -103,7 +103,7 @@ export default function BarChart({
           y1={innerH}
           y2={innerH}
           stroke="var(--axis)"
-          strokeWidth={1.5}
+          strokeWidth={1}
         />
         {xTicks.map((t) => (
           <text
@@ -127,7 +127,7 @@ export default function BarChart({
           y1={0}
           y2={innerH}
           stroke="var(--axis)"
-          strokeWidth={1.5}
+          strokeWidth={1}
         />
 
         {/* Country labels + flags */}
@@ -154,7 +154,7 @@ export default function BarChart({
                 r={FLAG_W / 2}
                 fill="none"
                 stroke="var(--border)"
-                strokeWidth={0.8}
+                strokeWidth={1}
               />
               {/* Country name */}
               {!compact && (
