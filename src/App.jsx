@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useWindowWidth } from "./useWindowWidth";
 import ResponsiveContainer from "./ResponsiveContainer";
 import BarChart from "./BarChart";
 import StackedAreaChart from "./StackedAreaChart";
@@ -14,10 +13,22 @@ import introIcon from "./assets/introduction.svg";
 const sharedYMax = 50000;
 
 function CountryPicker({ selectedCountries, onSelect }) {
-  const windowWidth = useWindowWidth();
-  const compact = windowWidth < 500;
+  const containerRef = useRef(null);
+  const [showNames, setShowNames] = useState(true);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      // 26 buttons × ~69px each needs ~900px for 2 rows; below that names cause 3 rows
+      setShowNames(el.getBoundingClientRect().width >= 900);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div style={{
+    <div ref={containerRef} style={{
       display: "flex", flexWrap: "wrap", gap: 0, justifyContent: "center",
       padding: 0,
       background: "var(--surface)",
@@ -50,7 +61,7 @@ function CountryPicker({ selectedCountries, onSelect }) {
               style={{ borderRadius: "50%", objectFit: "cover", border: "0.5px solid var(--border)" }}
               alt={country}
             />
-            {!compact && <span className="country-btn-label">{country}</span>}
+            {showNames && <span style={{ fontSize: 9 }}>{country}</span>}
           </button>
         );
       })}
@@ -81,14 +92,20 @@ export default function App() {
 
   const pickerRef = useRef(null);
   const chartsEndRef = useRef(null);
-  const [pickerFixed, setPickerFixed] = useState(false);
+  const [pickerTop, setPickerTop] = useState(null); // null = in-flow
 
   useEffect(() => {
     const check = () => {
       const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
       const pickerBottom = pickerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const pickerHeight = pickerRef.current?.getBoundingClientRect().height ?? 0;
       const chartsEndTop = chartsEndRef.current?.getBoundingClientRect().top ?? Infinity;
-      setPickerFixed(pickerBottom < headerBottom && chartsEndTop > headerBottom);
+
+      if (pickerBottom >= headerBottom) {
+        setPickerTop(null);
+      } else {
+        setPickerTop(Math.min(headerBottom, chartsEndTop - pickerHeight));
+      }
     };
     window.addEventListener("scroll", check, { passive: true });
     check();
@@ -316,8 +333,8 @@ export default function App() {
         </div>
 
         {/* ── Country picker ── */}
-        {pickerFixed && (
-          <div style={{ position: "fixed", top: headerHeight, left: "32px", width: "calc(100% - 64px)", zIndex: 9 }}>
+        {pickerTop !== null && (
+          <div style={{ position: "fixed", top: pickerTop, left: "32px", width: "calc(100% - 64px)", zIndex: 9 }}>
             <CountryPicker selectedCountries={selectedCountries} onSelect={selectCountry} />
           </div>
         )}
